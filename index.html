@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Security Engineering Lab — [Your Name]</title>
+<title>Security Engineering Lab — Eric Chamlongsong </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -401,8 +401,8 @@
       <p>
         Security engineering starts with an environment worth defending. This lab builds one:
         on-premises Active Directory and a hybrid Microsoft Entra ID tenant with the
-        identity, access, and device controls a real company would run — Conditional Access,
-        SSPR, Intune — instrumented so Defender and Sentinel have signal to work with. A Kali
+        identity, access, and device controls a real company would run. Conditional Access,
+        SSPR, Intune, instrumented so Defender and Sentinel have signal to work with. A Kali
         Linux attacker network sits alongside it, generating the telemetry that detection
         engineering and incident response are built and tested against.
       </p>
@@ -489,7 +489,7 @@
       <div class="index">01</div>
       <h2>Hyper-V infrastructure</h2>
       <p>
-        Everything runs on <strong>Hyper-V</strong> on a Windows 11 Pro host — a target
+        Everything runs on <strong>Hyper-V</strong> on a Windows 11 Pro host. A target
         environment and an attack platform sharing the same virtualization layer, kept apart
         by network segmentation. Five VMs make up the environment: a domain controller, a
         file server, two Windows 11 workstations at different stages of hybrid configuration,
@@ -527,9 +527,7 @@
         AD DS and DNS run on DC01 under the <code>CORP.local</code> domain. Rather than leaving
         everything in the default containers, the domain has a proper OU structure with Users,
         Groups, Computers, and Servers, populated with simulated employee and service accounts
-        across different departments and privilege levels — the same kind of privilege spread
-        that makes lateral movement and credential-abuse detections meaningful later on,
-        instead of testing against a flat, single-account domain.
+        across different departments and privilege levels.
       </p>
       <div class="details">
         <div class="detail-block">
@@ -566,11 +564,8 @@
         FS01 joined <code>CORP.local</code> and carries a dedicated 100 GB data disk mounted as
         <code>S:</code>, hosting departmental shares. Share and NTFS permissions were configured
         together against the AD security groups, then verified from an actual workstation
-        rather than assumed correct — Sarah's HR account can reach HR resources; accounts
-        outside the group can't. Correctly scoped RBAC is what makes an intrusion into one
-        account a contained event instead of full access to the file server — the boundary
-        a red-team exercise would try to walk around, and a blue-team investigation would
-        check first.
+        rather than assumed correct. Sarah's HR account can reach HR resources; accounts
+        outside the group can't.
       </p>
       <div class="detail-block" style="max-width:280px;">
         <div class="label">Departmental shares</div>
@@ -599,10 +594,7 @@
       <h2>Group Policy</h2>
       <p>
         Centralized workstation configuration moved into Group Policy: a baseline GPO covering
-        hardening and endpoint restrictions, and — deliberately, for later detection work —
-        PowerShell logging, since script block and module logging are what turn a Kali-driven
-        PowerShell exercise into an investigable event instead of a silent one. Policy
-        application was verified with <code>gpresult</code>, including working through cases
+        hardening and endpoint restrictions. Policy application was verified with <code>gpresult</code>, including working through cases
         where settings initially weren't applying as expected.
       </p>
       <div class="detail-block" style="max-width:320px;">
@@ -628,11 +620,7 @@
       <h2>Microsoft 365 / Entra ID</h2>
       <p>
         The lab expanded from purely on-premises AD into a hybrid Microsoft identity
-        environment, using a Microsoft 365 Business Premium tenant — because in most real
-        intrusions today, identity is the perimeter attackers actually target. Cloud-side
-        organization mirrors the same simulated company — departments, executive
-        administrative units, security groups, and dedicated test identities — giving the
-        access-control and sign-in work downstream something realistic to protect.
+        environment, using a Microsoft 365 Business Premium tenant. 
       </p>
       <div class="figure">
         <div class="cap">Microsoft Entra admin center — Users</div>
@@ -649,9 +637,7 @@
       <h2>Entra Connect and hybrid identity</h2>
       <p>
         DC01 also runs Microsoft Entra Connect Sync, linking the on-premises AD to Entra ID
-        with Password Hash Synchronization enabled and scoped OUs. This sync path is also a
-        known attacker target in real hybrid environments, which makes understanding its
-        normal behavior a prerequisite for spotting abuse of it later. One real issue surfaced
+        with Password Hash Synchronization enabled and scoped OUs. One real issue surfaced
         during setup: the Computers OU wasn't included in the sync scope at first, so devices
         weren't appearing in Entra. Correcting the scope and re-running sync cycles fixed it.
       </p>
@@ -670,12 +656,8 @@
       <h2>Hybrid Entra Join</h2>
       <p>
         With the Service Connection Point configured, endpoints register as both AD domain
-        joined and Entra registered — Hybrid Entra Joined. Confirmed on the workstation with
-        <code>dsregcmd /status</code>, and investigated Primary Refresh Token acquisition to
-        understand the practical difference between AD authentication, Entra identity, hybrid
-        join, and cloud SSO — rather than treating "hybrid identity" as one single feature.
-        PRTs are a real token-theft target in hybrid environments, so distinguishing normal
-        acquisition from something suspicious starts with knowing exactly what "normal" is.
+        joined and Entra registered, Hybrid Entra Joined. Confirmed on the workstation with
+        <code>dsregcmd /status</code>.
       </p>
       <div class="details">
         <div class="detail-block">
@@ -697,11 +679,8 @@
       <div class="index">08</div>
       <h2>Conditional Access and MFA</h2>
       <p>
-        Security Defaults were disabled to allow a custom Conditional Access configuration —
-        the policy layer that actually blocks or challenges sign-ins based on risk, not just
-        logs them. Policies requiring MFA were built for test groups and then actually
-        exercised by logging into the accounts — including working through propagation delay
-        before confirming enforcement — rather than trusting the policy configuration alone.
+        Security Defaults were disabled to allow a custom Conditional Access configuration Policies. Policies requiring MFA were built for test groups and then actually
+        exercised by logging into the accounts.
       </p>
       <div class="figure">
         <div class="cap">Conditional Access policies</div>
@@ -717,11 +696,9 @@
       <div class="index">09</div>
       <h2>Self-service password reset and delegated admin</h2>
       <p>
-        SSPR was configured requiring multiple authentication methods, since a single-factor
-        reset flow is its own attack surface. Henry.Helpdesk was assigned the Helpdesk
-        Administrator role — deliberately scoped rather than making every test account Global
-        Administrator — reflecting the least-privilege principle that limits how far a
-        compromised account can actually reach.
+        SSPR was configured requiring multiple authentication methods. Henry.Helpdesk was assigned the Helpdesk
+        Administrator role, deliberately scoped rather than making every test account Global
+        Administrator.
       </p>
       <div class="figure">
         <div class="cap">SSPR configuration</div>
@@ -739,9 +716,8 @@
       <p>
         Automatic Intune enrollment introduced a distinction that's easy to gloss over on
         paper but matters for incident response: a device existing in Entra is not the same
-        as a device actually being enrolled, managed, and reporting compliance to Intune —
-        and compliance state is often exactly what an analyst checks first when triaging an
-        alert from an endpoint. Work here covered enrollment scheduled tasks, licensing,
+        as a device actually being enrolled, managed, and reporting compliance to Intune.
+        Work here covered enrollment scheduled tasks, licensing,
         device and PRT state, OU sync scope, and troubleshooting sync errors such as
         "AAD is busy" and <code>SyncCycleInProgress</code>. WIN11-02 was built partly to have
         a clean endpoint to test against instead of continually repairing WIN11-01.
@@ -763,10 +739,10 @@
         This is the point of everything built before it: Microsoft Defender and Microsoft
         Sentinel are wired into Windows security event logs and Defender's own detection
         pipeline, so activity from the rest of the lab produces investigable telemetry instead
-        of disappearing. Validation started at the signature and heuristic layer — an EICAR
+        of disappearing. Validation started at the signature and heuristic layer. An EICAR
         test file and a real HackTool (Mimikatz), both delivered from KALI-01 over HTTP rather
         than created locally, to exercise the download itself alongside the file. Both were
-        caught on write: Mimikatz surfaced as a High-severity Credential Access alert, EICAR
+        caught. Mimikatz surfaced as a High-severity Credential Access alert, EICAR
         and a heuristic "Wacatac" detection landed as Informational, and Sentinel's own
         behavioral analytics separately fired twice on Process Execution Frequency Anomaly —
         confirmation that Sentinel's own detections engaged, not just Defender's antivirus engine.
@@ -776,12 +752,8 @@
         authentication attempt against a domain account from KALI-01, confirming the resulting
         4625 failed-logon events in Windows Event Viewer, then tracing them into Sentinel's
         <code>SecurityEvent</code> table via Advanced Hunting to confirm ingestion. The attempt
-        also tripped the domain's account lockout policy mid-test — a second, distinct signal
-        beyond the failed logons themselves. Opening the actual analytics rule meant to catch
-        this surfaced a real finding: it's a statistical anomaly rule built on an 8-day
-        historical baseline with a 50-event volume floor, so realistic manual test traffic
-        can't trigger it regardless of pattern — now driving a second, simpler threshold-based
-        rule built specifically to be validated with small, repeatable test batches.
+        also tripped the domain's account lockout policy mid-test, a second, distinct signal
+        beyond the failed logons themselves.
       </p>
       <div class="details">
         <div class="detail-block">
@@ -821,8 +793,8 @@
         would generalize, KALI-01 runs real offensive techniques against the domain, each one
         mapped to a MITRE ATT&amp;CK technique and designed around a specific detection it's
         meant to trip: a Python HTTP server and a PowerShell download cradle
-        (<code>Invoke-WebRequest</code>) to pull test payloads onto WIN11-02 — exercising
-        ingress tool transfer (T1105) alongside file-signature detection — and an SMB-based
+        (<code>Invoke-WebRequest</code>) to pull test payloads onto WIN11-02, exercising
+        ingress tool transfer (T1105) alongside file-signature detection and an SMB-based
         credential brute-force with CrackMapExec against a domain account (T1110), scoped to
         <code>corp.local</code> with a small targeted wordlist after an initial <code>nmap</code>
         check confirmed 139/445 open and a first full-dictionary run revealed the domain's
@@ -832,8 +804,7 @@
         Worth noting as its own finding: CrackMapExec itself errored out mid-run with repeated
         NETBIOS connection timeouts, while WIN11-02 had already logged the failed
         authentications and locked the account server-side. The attack tool's own client-side
-        noise isn't the same as what actually happened on the wire — Event Viewer and Sentinel
-        are the ground truth, not the terminal running the attack.
+        noise isn't the same as what actually happened on the wire.
       </p>
       <div class="detail-block" style="max-width:280px;">
         <div class="label">Isolated network — 10.10.10.0/24</div>
